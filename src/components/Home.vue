@@ -16,29 +16,37 @@
     <!-- 页面主体区域 -->
     <el-container>
       <!-- 侧边栏 -->
-      <el-aside width="280px">
+        <!-- 根据菜单是否折叠切换宽度 -->
+      <el-aside :width="isCollapse ? '64px' : '200px'">
+        <div class="toggle-button" @click="toggleCollapse">|||</div>
         <!-- 侧边栏菜单区域 -->
+          <!-- unique-opened 是否保持只有一个子菜单展开 -->
+          <!-- collapse折叠展开菜单,collapse-transition折叠动画  两个属性的值都是Boolean 需动态绑定-->
         <el-menu
           background-color="#323743"
           text-color="#fff"
-          active-text-color="#ffd04b"
+          active-text-color="#409eff"
+          unique-opened
+          :collapse="isCollapse"
+          :collapse-transition="false"
         >
           <!-- 一级菜单 -->
-          <el-submenu index="1">
+          <!-- index只接收字符串 -->
+          <el-submenu :index="item.id +  ''" v-for="item in menulist" :key="item.id">
             <!-- 一级菜单模板区域 -->
             <template slot="title">
               <!-- 图标 -->
-              <i class="el-icon-location"></i>
+              <i :class="iconsObj[item.id]"></i>
               <!-- 文本 -->
-              <span>导航一</span>
+              <span>{{item.authName}}</span>
             </template>
             <!-- 二级菜单 -->
-            <el-menu-item index="1-4-1">
+            <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.id">
               <template slot="title">
                 <!-- 图标 -->
-                <i class="el-icon-location"></i>
+                <i class="el-icon-menu"></i>
                 <!-- 文本 -->
-                <span>导航一</span>
+                <span>{{subItem.authName}}</span>
               </template>
             </el-menu-item>
           </el-submenu>
@@ -52,10 +60,38 @@
 
 <script>
 export default {
+  data() {
+    return {
+      // 左侧菜单数据
+      menulist: [],
+      iconsObj: {
+        125: 'iconfont icon-user',
+        103: 'iconfont icon-tijikongjian',
+        101: 'iconfont icon-shangpin',
+        102: 'iconfont icon-danju',
+        145: 'iconfont icon-baobiao'
+      },
+      isCollapse: false
+    }
+  },
+  // 菜单列表应该在页面加载完成马上获取，因此在这里添加生命周期函数created
+  created() {
+    this.getMenuList()
+  },
   methods: {
     logout() {
       window.sessionStorage.clear()
       this.$router.push('/login')
+    },
+    // 获取所有的菜单
+    async getMenuList() {
+      const { data: res } = await this.$http.get('menus')
+      if (res.meta.status !== 200) return
+      this.menulist = res.data
+    },
+    // 点击按钮切换菜单的折叠与展开
+    toggleCollapse() {
+      this.isCollapse = !this.isCollapse
     }
   }
 }
@@ -88,8 +124,24 @@ export default {
 }
 .el-aside {
   background-color: #333744;
-}
 .el-main {
   background-color: #eaedf1;
+}
+.el-menu {
+  // 补齐el-aside与el-menu的1px差距
+  border-right: 1px;
+}
+}
+.iconfont {
+  margin-right: 10px;
+}
+.toggle-button {
+  text-align: center;
+  line-height: 24px;
+  letter-spacing: 0.2em;
+  font-size: 10px;
+  color: #fff;
+  cursor: pointer;
+  background-color: #4A5064;
 }
 </style>
