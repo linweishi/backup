@@ -16,12 +16,13 @@
     <!-- 页面主体区域 -->
     <el-container>
       <!-- 侧边栏 -->
-        <!-- 根据菜单是否折叠切换宽度 -->
+      <!-- 根据菜单是否折叠切换宽度 -->
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="toggleCollapse">|||</div>
         <!-- 侧边栏菜单区域 -->
-          <!-- unique-opened 是否保持只有一个子菜单展开 -->
-          <!-- collapse折叠展开菜单,collapse-transition折叠动画  两个属性的值都是Boolean 需动态绑定-->
+        <!-- unique-opened 是否保持只有一个子菜单展开 -->
+        <!-- collapse折叠展开菜单,collapse-transition折叠动画  两个属性的值都是Boolean 需动态绑定-->
+        <!-- router开启elementUI的路由跳转功能，配合二级菜单的index使用 -->
         <el-menu
           background-color="#323743"
           text-color="#fff"
@@ -29,31 +30,46 @@
           unique-opened
           :collapse="isCollapse"
           :collapse-transition="false"
+          :router="true"
+          :default-active="activePath"
         >
           <!-- 一级菜单 -->
           <!-- index只接收字符串 -->
-          <el-submenu :index="item.id +  ''" v-for="item in menulist" :key="item.id">
+          <el-submenu
+            :index="item.id + ''"
+            v-for="item in menulist"
+            :key="item.id"
+          >
             <!-- 一级菜单模板区域 -->
             <template slot="title">
               <!-- 图标 -->
               <i :class="iconsObj[item.id]"></i>
               <!-- 文本 -->
-              <span>{{item.authName}}</span>
+              <span>{{ item.authName }}</span>
             </template>
             <!-- 二级菜单 -->
-            <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.id">
+            <!-- index配合路由使用，服务器返回的subItmen.path作为跳转地址 -->
+            <el-menu-item
+              :index="'/' + subItem.path"
+              v-for="subItem in item.children"
+              :key="subItem.id"
+              @click="saveNavState('/' + subItem.path)"
+            >
               <template slot="title">
                 <!-- 图标 -->
                 <i class="el-icon-menu"></i>
                 <!-- 文本 -->
-                <span>{{subItem.authName}}</span>
+                <span>{{ subItem.authName }}</span>
               </template>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
       <!-- 右侧内容主体 -->
-      <el-main>Main</el-main>
+      <el-main>
+        <!-- 路由占位符 -->
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -71,12 +87,16 @@ export default {
         102: 'iconfont icon-danju',
         145: 'iconfont icon-baobiao'
       },
-      isCollapse: false
+      // 是否折叠
+      isCollapse: false,
+      // 被激活的链接地址
+      activePath: ''
     }
   },
   // 菜单列表应该在页面加载完成马上获取，因此在这里添加生命周期函数created
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     logout() {
@@ -92,6 +112,10 @@ export default {
     // 点击按钮切换菜单的折叠与展开
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存链接的激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
     }
   }
 }
@@ -124,13 +148,13 @@ export default {
 }
 .el-aside {
   background-color: #333744;
-.el-main {
-  background-color: #eaedf1;
-}
-.el-menu {
-  // 补齐el-aside与el-menu的1px差距
-  border-right: 1px;
-}
+  .el-main {
+    background-color: #eaedf1;
+  }
+  .el-menu {
+    // 补齐el-aside与el-menu的1px差距
+    border-right: 1px;
+  }
 }
 .iconfont {
   margin-right: 10px;
@@ -142,6 +166,6 @@ export default {
   font-size: 10px;
   color: #fff;
   cursor: pointer;
-  background-color: #4A5064;
+  background-color: #4a5064;
 }
 </style>

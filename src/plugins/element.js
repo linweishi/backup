@@ -11,7 +11,12 @@ import {
   Main,
   Menu,
   Submenu,
-  MenuItem
+  MenuItem,
+  Breadcrumb,
+  BreadcrumbItem,
+  Card,
+  Row,
+  Col
 } from 'element-ui'
 
 Vue.use(Button)
@@ -25,6 +30,11 @@ Vue.use(Main)
 Vue.use(Menu)
 Vue.use(Submenu)
 Vue.use(MenuItem)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Card)
+Vue.use(Row)
+Vue.use(Col)
 
 // 将Message弹框提示全局挂载到 Vue， $message 为自定义属性
 Vue.prototype.$message = Message
