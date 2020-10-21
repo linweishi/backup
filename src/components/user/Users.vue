@@ -100,7 +100,7 @@
 
     <!-- 用于添加用户的对话框 -->
     <el-dialog
-      title="提示"
+      title="添加用户"
       :visible.sync="addDialogVisible"
       width="50%"
       @close="addDialogClosed"
