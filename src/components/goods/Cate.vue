@@ -216,13 +216,26 @@ export default {
     },
     // 点击按钮，添加新的分类
     addCate() {
-      console.log(this.addCateForm)
+      this.$refs.addCateFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.post('categories', this.addCateForm)
+
+        if (res.meta.status !== 201) {
+          return this.$message.error('添加分类失败!')
+        }
+
+        this.$message.success('添加分类成功!')
+        this.getCateList()
+        this.addCateDialogVisible = false
+      })
     },
     // 监听 添加分类对话框的关闭事件,重置表单数据
     addCateDialogClosed() {
       this.$refs.addCateFormRef.resetFields()
       // 级联选择器el-cascader没有resetFields，以下是两种方法
-      // this.selectedKeys = []
+      /* this.selectedKeys = []
+      this.addCateForm.cat_level = 0
+      this.addCateForm.cat_pid = 0 */
       // 清空级联选择器的第二种方法
       const obj = {}
       obj.stopPropagation = () => {}
