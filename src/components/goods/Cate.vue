@@ -349,9 +349,4 @@ export default {
 .el-cascader {
   width: 100%;
 }
-// 修改下拉框内容的高度
-.el-cascader-menu {
-  height: 300px;
-}
-
 </style>

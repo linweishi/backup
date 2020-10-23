@@ -21,6 +21,10 @@ html, body, #app {
     margin-top: 15px;
 }
 /* 级联选择器下拉内容高度溢出限制 */
-.el-cascader-menu {
-  height: 300px;
+.el-cascader-panel {
+    height: 300px;
+}
+/* 去掉级联选择器底部水平滚动条 */
+.el-cascader-panel .el-scrollbar__wrap {
+  overflow-x: hidden !important;
 }
