@@ -33,7 +33,7 @@
         </template>
         <!-- 操作 列 -->
         <template slot="opt" slot-scope="scope">
-          <el-button type="primary" size="mini" icon="el-icon-edit">编辑</el-button>
+          <el-button type="primary" size="mini" icon="el-icon-edit" @click="editCateDialog(scope.row.cat_id)">编辑</el-button>
           <el-button type="danger" size="mini" icon="el-icon-delete">删除</el-button>
         </template>
       </tree-table>
@@ -69,6 +69,23 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="addCateDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="addCate">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 编辑 按钮的对话框 -->
+    <el-dialog
+      title="修改分类"
+      :visible.sync="editCateDialogVisible"
+      width="50%">
+      <!-- 添加分类的表单 -->
+      <el-form ref="editCateFormRef" :model="editCateForm" label-width="100px" :rules="editCateFormRules">
+        <el-form-item label="分类名称:" prop="cat_name">
+          <el-input v-model="editCateForm.cat_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editCateDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editCate">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -143,7 +160,20 @@ export default {
         children: 'children'
       },
       // 选中的父级分类的Id数组
-      selectedKeys: []
+      selectedKeys: [],
+      // 控制[编辑]分类对话框的显示与隐藏
+      editCateDialogVisible: false,
+      // 编辑分类 表单的数据对象
+      editCateForm: {
+        cat_name: '',
+        cat_id: 0
+      },
+      // 编辑分类 表单的验证规则
+      editCateFormRules: {
+        cat_name: [
+          { required: true, message: '请输入分类名称', trigger: 'blur' }
+        ]
+      }
 
     }
   },
@@ -244,6 +274,38 @@ export default {
       } catch (err) {
         this.$refs.clearCascader.handleClear(obj)
       }
+    },
+
+    // 点击 编辑 按钮，打开编辑页面表单
+    async editCateDialog(id) {
+      const { data: res } = await this.$http.get('categories/' + id)
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取分类名称失败!')
+      }
+
+      // 将服务器响应的 cat_id 和 cat_name 赋值到 editeCateFrom 表单数据对象
+      this.editCateForm.cat_id = res.data.cat_id
+      this.editCateForm.cat_name = res.data.cat_name
+
+      // 点击 编辑 按钮， 显示编辑对话框
+      this.editCateDialogVisible = true
+    },
+
+    // 编辑 分类 表单提交
+    async editCate() {
+      const { data: res } = await this.$http.put('categories/' + this.editCateForm.cat_id, {
+        cat_name: this.editCateForm.cat_name
+      })
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('修改分类名称失败!')
+      }
+      this.$message.success('修改分类名称成功!')
+      // 重新获取分类列表
+      this.getCateList()
+      // 关闭对话框
+      this.editCateDialogVisible = false
     }
   }
 }
