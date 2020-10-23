@@ -34,7 +34,7 @@
         <!-- 操作 列 -->
         <template slot="opt" slot-scope="scope">
           <el-button type="primary" size="mini" icon="el-icon-edit" @click="editCateDialog(scope.row.cat_id)">编辑</el-button>
-          <el-button type="danger" size="mini" icon="el-icon-delete">删除</el-button>
+          <el-button type="danger" size="mini" icon="el-icon-delete" @click="removeCate(scope.row.cat_id)">删除</el-button>
         </template>
       </tree-table>
       <!-- 分页区域 -->
@@ -306,6 +306,29 @@ export default {
       this.getCateList()
       // 关闭对话框
       this.editCateDialogVisible = false
+    },
+
+    // 删除分类
+    async removeCate(id) {
+      const result = await this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+      if (result === 'confirm') {
+        const { data: res } = await this.$http.delete('categories/' + id)
+        if (res.meta.status !== 200) {
+          return this.$message.error('删除分类失败!')
+        }
+        this.$message.success('分类删除成功!')
+        // 重新获取分类列表
+        this.getCateList()
+      }
     }
   }
 }
