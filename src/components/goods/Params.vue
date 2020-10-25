@@ -295,7 +295,7 @@ export default {
     async showEditDialog(attr_id) {
       // eslint-disable-next-line
       const { data: res } = await this.$http.get(`categories/${this.cateId}/attributes/${attr_id}`, {
-        // 去掉params: {} 直接写 attr_sel: this.activeName 不影响结果
+        // Axios发起get请求必须添加params参数，Axios会把参数拼接到url中
         params: { attr_sel: this.activeName }
       })
       if (res.meta.status !== 200) {

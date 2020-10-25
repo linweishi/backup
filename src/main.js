@@ -28,6 +28,22 @@ Vue.config.productionTip = false
 // 将第三方树形表格注册为全局组件
 Vue.component('tree-table', TreeTable)
 
+// 定义全局过滤器处理时间格式
+Vue.filter('dateFormat', function(originVal) {
+  const dt = new Date(originVal)
+
+  const y = dt.getFullYear()
+  // padStart(2, '0') 不足两位数时用 0 填充
+  const m = (dt.getMonth() + 1 + '').padStart(2, '0')
+  const d = (dt.getDate() + '').padStart(2, '0')
+
+  const hh = (dt.getHours() + '').padStart(2, '0')
+  const mm = (dt.getMinutes() + '').padStart(2, '0')
+  const ss = (dt.getSeconds() + '').padStart(2, '0')
+
+  return `${y}-${m}-${d} ${hh}:${mm}:${ss}`
+})
+
 new Vue({
   router,
   render: h => h(App)
