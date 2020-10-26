@@ -9,6 +9,13 @@ import './assets/css/global.css'
 // 导入第三方树形表格依赖
 import TreeTable from 'vue-table-with-tree-grid'
 
+// 导入第三方富文本编辑器
+import VueQuillEditor from 'vue-quill-editor'
+// require styles 导入富文本编辑器对应的样式
+import 'quill/dist/quill.core.css' // import styles
+import 'quill/dist/quill.snow.css' // for snow theme
+import 'quill/dist/quill.bubble.css' // for bubble theme
+
 // 导入Axios
 import axios from 'axios'
 // 配置请求的根路径
@@ -27,6 +34,8 @@ Vue.config.productionTip = false
 
 // 将第三方树形表格注册为全局组件
 Vue.component('tree-table', TreeTable)
+// 将富文本编辑器，注册为全局可用的组件
+Vue.use(VueQuillEditor)
 
 // 定义全局过滤器处理时间格式
 Vue.filter('dateFormat', function(originVal) {

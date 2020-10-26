@@ -112,7 +112,13 @@
               <el-button size="small" type="primary">点击上传</el-button>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品内容" name="4">商品内容</el-tab-pane>
+          <el-tab-pane label="商品内容" name="4">
+            <!-- 富文本编辑器组件 -->
+            <quill-editor v-model="addForm.goods_introduce">
+            </quill-editor>
+            <!-- 添加商品的按钮 -->
+            <el-button type="primary" class="btnAdd" @click="add">添加商品</el-button>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
@@ -129,6 +135,8 @@
 </template>
 
 <script>
+import _ from 'lodash'
+
 export default {
   data() {
     return {
@@ -141,7 +149,13 @@ export default {
         goods_number: 0,
         // 商品所属的分类数组
         goods_cat: [],
-        pics: []
+        // 图片数组
+        pics: [],
+        // 商品的详情
+        goods_introduce: '',
+        // 商品的参数（数组）： 动态参数和静态属性
+        attrs: []
+
       },
       // 表单校验规则对象
       addFormRules: {
@@ -176,6 +190,7 @@ export default {
       onlyTableData: [],
       // 上传图片的URL地址
       uploadURL: 'http://127.0.0.1:8888/api/private/v1/upload',
+
       // 图片上传时所需要配置的请求头
       headerObj: {
         Authorization: window.sessionStorage.getItem('token')
@@ -284,6 +299,51 @@ export default {
       // 将图片信息对象，push到pics数组中
       this.addForm.pics.push(picInfo)
       // console.log(this.addForm)
+    },
+    // 点击添加商品按钮所触发的事件
+    add() {
+      this.$refs.addFormRef.validate(async valid => {
+        if (!valid) {
+          return this.$message.error('请添加必要的表单项!')
+        }
+
+        // 执行添加的业务
+        // 级联选择器使用v-model双向绑定，接收一个数组，这里直接将addForm.goods_cat转化为字符串会引起冲突
+        // this.addForm.goods_cat = this.addForm.goods_cat.join(',')
+        // 因此采用深拷贝addForm，在拷贝后的新对象中进行操作， 深拷贝这里采用lodash 第三方js库提供的方法
+        const form = _.cloneDeep(this.addForm)
+        form.goods_cat = form.goods_cat.join(',')
+        // 处理动态参数
+        this.manyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals.join(' ')
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        // 处理静态属性
+        this.onlyTableData.forEach(item => {
+          const newInfo = {
+            attr_id: item.attr_id,
+            attr_value: item.attr_vals
+          }
+          this.addForm.attrs.push(newInfo)
+        })
+        form.attrs = this.addForm.attrs
+        console.log(form)
+
+        // 发起请求添加商品
+
+        // 商品的名称, 必须是唯一的
+        const { data: res } = await this.$http.post('goods', form)
+
+        if (res.meta.status !== 201) {
+          return this.$message.error('添加商品失败!')
+        }
+
+        this.$message.success('添加商品成功!')
+        this.$router.push('/goods')
+      })
     }
   },
   computed: {
@@ -303,5 +363,8 @@ export default {
 }
 .previewImg {
   width: 100%;
+}
+.btnAdd {
+  margin-top: 15px;
 }
 </style>
