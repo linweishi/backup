@@ -39,6 +39,10 @@ import {
   Upload
 } from 'element-ui'
 
+// vue-cli安装的vue-cli-plugin-element中版本较旧，不支持 timeline 时间线组件，这里使用单独的文件导入来使用
+import Timeline from './timeline/index'
+import TimelineItem from './timeline-item/index'
+
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
@@ -74,6 +78,8 @@ Vue.use(Step)
 Vue.use(CheckboxGroup)
 Vue.use(Checkbox)
 Vue.use(Upload)
+Vue.use(Timeline)
+Vue.use(TimelineItem)
 
 // 将Message弹框提示全局挂载到 Vue， $message 为自定义属性
 Vue.prototype.$message = Message
