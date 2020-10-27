@@ -60,7 +60,7 @@
             <el-form-item label="商品名称" prop="goods_name">
               <el-input v-model="editForm.goods_name"></el-input>
             </el-form-item>
-            <el-form-item label="商品价格"  prop="goods_name">
+            <el-form-item label="商品价格"  prop="goods_price">
               <el-input v-model="editForm.goods_price"></el-input>
             </el-form-item>
             <el-form-item label="商品数量"  prop="goods_number">
@@ -69,13 +69,25 @@
             <el-form-item label="商品重量" prop="goods_weight">
               <el-input v-model="editForm.goods_weight"></el-input>
             </el-form-item>
+            <!-- 商品分类  -->
+            <el-form-item label="商品分类">
+              <!-- 级联选择器-商品分类列表 -->
+              <el-cascader
+                v-model="editForm.goods_cat"
+                :options="catelist"
+                :props="cateProps"
+                @change="handleChange"
+              >
+              </el-cascader>
+            </el-form-item>
             <el-form-item label="商品介绍">
               <!-- 富文本编辑器组件 -->
+              <!-- quill默认将添加的图片压缩成base64，对大图片不友好，可以将图片提交服务器返回链接，将链接插入quill，此处暂不实现该功能 -->
             <quill-editor v-model="editForm.goods_introduce">
             </quill-editor>
             </el-form-item>
-            <!-- 图片编辑组件 -->
-            <el-form-item label="商品图片">
+            <!-- 图片编辑组件 获取不到已有的图片的临时路径，此功能不做-->
+            <!-- <el-form-item label="商品图片">
               <el-upload
               action="http://127.0.0.1:8888/api/private/v1/upload"
               :on-preview="handlePreview"
@@ -86,7 +98,7 @@
               list-type="picture">
                 <el-button size="small" type="primary">点击上传</el-button>
               </el-upload>
-            </el-form-item>
+            </el-form-item> -->
 
           </el-form>
           <span slot="footer" class="dialog-footer">
@@ -149,7 +161,16 @@ export default {
       // 控制图片预览框的显示与隐藏
       previewVisible: false,
       // 图片预览的图片路径
-      previewPath: ''
+      previewPath: '',
+      // 商品分类列表
+      catelist: [],
+      // 级联选择器的配置
+      cateProps: {
+        expandTrigger: 'hover',
+        label: 'cat_name',
+        value: 'cat_id',
+        children: 'children'
+      }
     }
   },
   created() {
@@ -194,6 +215,7 @@ export default {
         return this.$message.error('获取商品数据失败!')
       }
       this.editForm = res.data
+      this.getCateList()
       // 显示对话框
       this.editGoodsDialogVisible = true
       // 将取得的图片数组进行循环遍历，把对应属性值赋值给upload组件的file-list属性用于展示图片列表
@@ -212,6 +234,25 @@ export default {
         this.editForm.pics.push(oldTmpPath)
       })
       console.log(this.editForm)
+    },
+    // 获取分类列表
+    async getCateList() {
+      const { data: res } = await this.$http.get('categories')
+
+      if (res.meta.status !== 200) {
+        this.$message.error('获取商品分类数据失败!')
+      }
+
+      this.catelist = res.data
+      // console.log(this.catelist)
+    },
+    // 级联选择器选中项变化，会触发这个函数
+    handleChange() {
+      console.log(this.editForm.goods_cat)
+      // 如果没有选择三级分类，直接清空
+      if (this.editForm.goods_cat.length !== 3) {
+        this.editForm.goods_cat = []
+      }
     },
     // 点击 删除 触发的函数
     async removeById(id) {
@@ -239,6 +280,7 @@ export default {
     },
     // 点击 添加商品 按钮， 跳转到商品添加页面
     goAddpage() {
+      // 编程式导航
       this.$router.push('/goods/add')
     },
     // 监听图片上传成功的事件
@@ -282,15 +324,18 @@ export default {
           goods_price: this.editForm.goods_price,
           goods_number: this.editForm.goods_number,
           goods_weight: this.editForm.goods_weight,
+          goods_cat: this.editForm.goods_cat instanceof Array ? this.editForm.goods_cat.join(',') : this.editForm.goods_cat,
           goods_introduce: this.editForm.goods_introduce,
           attrs: this.editForm.attrs
         })
-        if (res.meta.status !== 201) {
+
+        if (res.meta.status !== 200) {
           return this.$message.error('编辑商品信息失败!')
         }
         this.$message.success('编辑商品信息成功!')
 
         this.editGoodsDialogVisible = false
+        this.getGoodsList()
       })
     }
 
